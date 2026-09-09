@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "Why is chunking necessary in a RAG system?",
+    "expect_refusal": false
+  },
+  {
+    "id": 2,
+    "question": "What is an embedding?",
+    "expect_refusal": false
+  },
+  {
+    "id": 3,
+    "question": "Why is semantic similarity useful for RAG?",
+    "expect_refusal": false
+  },
+  {
+    "id": 4,
+    "question": "What does top-k mean in retrieval?",
+    "expect_refusal": false
+  },
+  {
+    "id": 5,
+    "question": "What are the trade-offs between small and large chunks?",
+    "expect_refusal": false
+  },
+  {
+    "id": 6,
+    "question": "Why should retrieval failures and generation failures be evaluated separately?",
+    "expect_refusal": false
+  },
+  {
+    "id": 7,
+    "question": "What are the health benefits of drinking green tea?",
+    "expect_refusal": true
+  },
+  {
+    "id": 8,
+    "question": "Who won the FIFA World Cup in 2022?",
+    "expect_refusal": true
+  },
+  {
+    "id": 9,
+    "question": "What is the capital of Australia?",
+    "expect_refusal": true
+  },
+  {
+    "id": 10,
+    "question": "How does photosynthesis work?",
+    "expect_refusal": true
+  },
+  {
+    "id": 11,
+    "question": "What causes earthquakes?",
+    "expect_refusal": true
+  },
+  {
+    "id": 12,
+    "question": "How do vaccines protect against infectious diseases?",
+    "expect_refusal": true
+  }
+]
