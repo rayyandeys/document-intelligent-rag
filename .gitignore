@@ -13,9 +13,14 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Local data
+# Local / generated data
 data/raw/*
 data/processed/*
+data/uploads/
+data/indexes/
+
+# Generated FAISS indexes
+*.index
 
 # IDE
 .vscode/
