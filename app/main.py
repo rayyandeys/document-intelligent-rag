@@ -3,6 +3,7 @@ import shutil
 import uuid
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from src.ingestion.pdf_loader import load_pdf
@@ -22,7 +23,23 @@ from src.generation.generator import Generator
 
 app = FastAPI(
     title="Document Intelligence RAG API",
-    version="1.0.0"
+    version="1.0.0",
+)
+
+
+# --------------------------------------------------
+# CORS
+# --------------------------------------------------
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -33,22 +50,14 @@ app = FastAPI(
 UPLOAD_DIR = Path("data/uploads")
 INDEX_DIR = Path("data/indexes")
 
-UPLOAD_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
-
-INDEX_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # --------------------------------------------------
 # MODELS
 # --------------------------------------------------
 
-# Load these once when the API starts.
 embedder = Embedder()
 generator = Generator()
 
@@ -87,72 +96,61 @@ def health():
 
 @app.post("/documents/upload")
 async def upload_document(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
 ):
     if not file.filename:
         raise HTTPException(
             status_code=400,
-            detail="A filename is required."
+            detail="A filename is required.",
         )
 
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are supported."
+            detail="Only PDF files are supported.",
         )
 
     document_id = str(uuid.uuid4())
 
-    pdf_path = (
-        UPLOAD_DIR /
-        f"{document_id}.pdf"
-    )
-
-    document_index_dir = (
-        INDEX_DIR /
-        document_id
-    )
+    pdf_path = UPLOAD_DIR / f"{document_id}.pdf"
+    document_index_dir = INDEX_DIR / document_id
 
     try:
-        # Save uploaded PDF.
         with open(pdf_path, "wb") as buffer:
             shutil.copyfileobj(
                 file.file,
-                buffer
+                buffer,
             )
 
-        # Extract text page by page.
         pages = load_pdf(
             str(pdf_path)
         )
 
-        # Sentence-aware chunking using our
-        # benchmark-selected 400-character budget.
+        # Keep the UUID for internal storage while preserving
+        # the user's original filename for source attribution.
+        for page in pages:
+            page["source"] = file.filename
+
         chunks = smart_chunk_pages(
             pages,
             chunk_size=400,
-            overlap_sentences=1
+            overlap_sentences=1,
         )
 
-        # Generate normalized MiniLM embeddings.
         embeddings = embedder.embed_chunks(
             chunks
         )
 
-        # Build exact FAISS inner-product index.
         retriever = FAISSRetriever(
             chunks=chunks,
             embeddings=embeddings,
-            embedder=embedder
+            embedder=embedder,
         )
 
-        # Save vectors and chunk metadata.
         save_retrieval_index(
             retriever=retriever,
             chunks=chunks,
-            directory=str(
-                document_index_dir
-            )
+            directory=str(document_index_dir),
         )
 
     except Exception as error:
@@ -162,12 +160,12 @@ async def upload_document(
 
         shutil.rmtree(
             document_index_dir,
-            ignore_errors=True
+            ignore_errors=True,
         )
 
         raise HTTPException(
             status_code=500,
-            detail=f"Document processing failed: {error}"
+            detail=f"Document processing failed: {error}",
         )
 
     finally:
@@ -178,7 +176,7 @@ async def upload_document(
         "filename": file.filename,
         "pages": len(pages),
         "chunks": len(chunks),
-        "status": "indexed"
+        "status": "indexed",
     }
 
 
@@ -188,74 +186,68 @@ async def upload_document(
 
 @app.post("/query")
 def query_document(
-    request: QueryRequest
+    request: QueryRequest,
 ):
     if not request.question.strip():
         raise HTTPException(
             status_code=400,
-            detail="Question cannot be empty."
+            detail="Question cannot be empty.",
         )
 
     if request.top_k <= 0:
         raise HTTPException(
             status_code=400,
-            detail="top_k must be greater than 0."
+            detail="top_k must be greater than 0.",
         )
 
     document_index_dir = (
-        INDEX_DIR /
-        request.document_id
+        INDEX_DIR / request.document_id
     )
 
     if not document_index_dir.exists():
         raise HTTPException(
             status_code=404,
-            detail="Document index not found."
+            detail="Document index not found.",
         )
 
     try:
-        # Load persisted FAISS vectors
-        # and corresponding chunk metadata.
         retriever = load_retrieval_index(
-            directory=str(
-                document_index_dir
-            ),
-            embedder=embedder
+            directory=str(document_index_dir),
+            embedder=embedder,
         )
 
-        # Retrieve relevant evidence.
         results = retriever.retrieve(
             query=request.question,
-            top_k=request.top_k
+            top_k=request.top_k,
         )
 
-        # Generate grounded answer using
-        # only the retrieved evidence.
         answer = generator.generate(
             query=request.question,
-            retrieved_chunks=results
+            retrieved_chunks=results,
         )
 
     except Exception as error:
         raise HTTPException(
             status_code=500,
-            detail=f"Query processing failed: {error}"
+            detail=f"Query processing failed: {error}",
         )
 
     sources = []
 
     for result in results:
-        sources.append({
-            "chunk_id": result["chunk_id"],
-            "page": result["page"],
-            "source": result["source"],
-            "score": result["score"],
-            "text": result["text"]
-        })
+        sources.append(
+            {
+                "chunk_id": result["chunk_id"],
+                "page": result["page"],
+                "source": result["source"],
+                "score": result["score"],
+                "text": result["text"],
+            }
+        )
 
     return {
         "document_id": request.document_id,
         "question": request.question,
         "answer": answer,
-        "sources": sources
+        "sources": sources,
     }

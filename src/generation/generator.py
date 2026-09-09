@@ -39,11 +39,15 @@ Answer the question using ONLY the evidence provided below.
 
 Rules:
 1. Do not use outside knowledge.
-2. If the evidence is insufficient, say:
-   "The provided documents do not contain enough information to answer this question."
+2. If the evidence is insufficient, respond with exactly:
+   The provided documents do not contain enough information to answer this question.
 3. Do not invent facts.
 4. Cite supporting evidence using the format [Source: filename, Page: number].
 5. Keep the answer clear and concise.
+6. Return plain text only.
+7. Do not use Markdown formatting such as asterisks, bold text, headings, or numbered Markdown lists.
+8. When listing multiple points, use simple lines beginning with a hyphen (-).
+9. Every factual claim in the answer must be supported by the provided evidence.
 
 EVIDENCE:
 {context}
