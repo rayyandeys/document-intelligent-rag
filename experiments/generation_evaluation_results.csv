@@ -1,0 +1,15 @@
+id,question,expect_refusal,is_refusal,has_citation,correct_behavior,top_retrieval_score,answer
+1,Why is chunking necessary in a RAG system?,False,True,False,False,0.7647823095321655,The provided documents do not contain enough information to answer this question.
+2,What is an embedding?,False,False,True,True,0.6942318081855774,"An embedding is a numerical representation of text [Source: sample.pdf, Page: 1, Page: 2]. 
+
+It has the following characteristics:
+- It represents the semantic information in text as a vector of numerical values [Source: sample.pdf, Page: 2].
+- Texts with related meanings tend to have embeddings that are closer together according to a suitable similarity measure [Source: sample.pdf, Page: 2]."
+3,Why is semantic similarity useful for RAG?,False,False,True,True,0.7727236151695251,"Semantic similarity is useful for RAG for the following reasons:
+- Users may ask questions using words that do not appear exactly in the relevant document passage [Source: sample.pdf, Page: 3].
+- A semantic retrieval system can potentially find relevant passages based on meaning rather than exact keyword matches [Source: sample.pdf, Page: 3]."
+4,What does top-k mean in retrieval?,False,False,True,True,0.6238484978675842,"In retrieval, the value of k determines how many chunks are retrieved, with the system selecting the top-k most similar chunks [Source: sample.pdf, Page: 3]. For example, if k is set to 3, the system retrieves the three chunks with the highest similarity scores [Source: sample.pdf, Page: 3]."
+5,What are the trade-offs between small and large chunks?,False,False,True,True,0.7188068628311157,"- Smaller chunks may improve retrieval precision because each chunk contains a relatively focused idea [Source: sample.pdf, Page: 5].
+- Smaller or extremely small chunks may lack the context required to answer complex questions or contain insufficient context to answer a question [Source: sample.pdf, Page: 2, Page: 5].
+- Larger chunks may provide more context [Source: sample.pdf, Page: 5].
+- Larger or extremely large chunks can contain unrelated information or several unrelated ideas, which can reduce retrieval precision and provide the language model with unnecessary context [Source: sample.pdf, Page: 2, Page: 5]."
