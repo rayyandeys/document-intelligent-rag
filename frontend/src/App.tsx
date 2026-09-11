@@ -587,7 +587,7 @@ function App() {
                 RETRIEVAL OUTPUT
               </span>
 
-              <h2>Grounded response.</h2>
+              <h2>Document response.</h2>
             </div>
 
             <div className="answer-card glass">
@@ -604,9 +604,11 @@ function App() {
 >
   <span className="status-pulse" />
 
-  {insufficientEvidence
-    ? "INSUFFICIENT EVIDENCE"
-    : "EVIDENCE GROUNDED"}
+  {asking
+    ? "GENERATING ANSWER"
+    : insufficientEvidence
+      ? "INSUFFICIENT EVIDENCE"
+      : "BASED ON RETRIEVED TEXT"}
 </div>
               </div>
 
@@ -624,7 +626,7 @@ function App() {
                     </strong>
                     <p>
                       Retrieving evidence and generating
-                      a grounded response...
+                      a response from the retrieved text...
                     </p>
                   </div>
                 </div>
@@ -658,6 +660,8 @@ function App() {
     : `${sources.length} semantic matches`}
 </span>
                 </div>
+
+                <p>Similarity measures text relevance, not answer confidence. Check the cited passages to verify the answer.</p>
 
                 <div className="evidence-grid">
                   {sources.map((source, index) => (

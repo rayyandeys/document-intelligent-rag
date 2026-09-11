@@ -2,7 +2,7 @@ Evaluating Chunking Strategies for Retrieval-Augmented Generation over Scientifi
 
 Syed Mohammed Rayyan
 
-Research paper-style technical report. This manuscript is a working draft; the controlled generation evaluation remains partially incomplete because of external API quota limits.
+Research paper-style technical report. Updated with the completed controlled generation evaluation; not a claim of peer review or publication.
 
 Abstract
 
@@ -10,7 +10,7 @@ Retrieval-Augmented Generation (RAG) systems depend on the quality of retrieved 
 
 Retrieval performance was evaluated on the SciFact benchmark using 5,183 scientific documents and 300 evaluated test queries. Five chunk-size configurations with target budgets of 400, 600, 800, 1000, and 1200 characters were compared while holding the embedding model and one-sentence overlap strategy constant. A whole-document MiniLM retrieval configuration was used as a baseline. The 400-character configuration achieved the highest Hit@1 (57.67%) and MRR@10 (0.6570), compared with 50.33% and 0.6068 for the whole-document baseline. This is a 7.34 percentage-point improvement in Hit@1 and approximately 8.3% relative improvement in MRR@10. The 600-character configuration, however, achieved the highest Hit@3 (72.00%) and Hit@5 (78.33%), showing that the preferred chunk size depends on retrieval depth and objective rather than a single universally optimal setting.
 
-The system also includes a controlled generation evaluation that separately examines citation behavior for supported questions and refusal behavior for unsupported questions. At the present checkpoint, five supported-query trials have been recorded: four produced non-refusal answers containing source/page citations, while one supported query was incorrectly refused despite a high retrieval similarity score. The remaining planned trials were not completed because of external API quota exhaustion and are therefore not treated as generation failures. These observations reinforce the need to evaluate retrieval and generation as distinct stages of a RAG pipeline.
+All 12 controlled questions completed: supported citation behavior was 5/6 (83.33%), unsupported refusal behavior was 6/6 (100.00%), and overall expected behavior was 11/12 (91.67%). These are citation/refusal behavior scores on a small controlled set, not general factual accuracy. The original supported false refusal remains included in the results.
 
 1. Introduction
 
@@ -122,25 +122,25 @@ Whole document
 
 5,183
 
-400 characters
+400 chars
 
-36,263 chunks
+36,263
 
-600 characters
+600 chars
 
-21,565 chunks
+21,565
 
-800 characters
+800 chars
 
-14,567 chunks
+14,567
 
-1000 characters
+1000 chars
 
-11,442 chunks
+11,442
 
-1200 characters
+1200 chars
 
-9,304 chunks
+9,304
 
 For the chunked benchmark, the retrieval procedure obtains the top 50 chunks and deduplicates results by document identifier, preserving the first occurrence of each document until ten unique documents are obtained. This is a chunk-first document-ranking approximation and should not be interpreted as exhaustive document-level max-score aggregation over every chunk.
 
@@ -154,13 +154,13 @@ Together, these metrics distinguish immediate first-result quality from the abil
 
 5.4 Generation and Grounding Evaluation
 
-A planned 12-question controlled generation set contains six questions supported by the controlled PDF and six deliberately unsupported general-knowledge questions.
+A 12-question controlled generation set contains six questions supported by the controlled PDF and six deliberately unsupported general-knowledge questions.
 
 Supported behavior is currently scored as a non-refusal answer that contains the required source/page citation syntax. Unsupported behavior is scored as returning the exact insufficiency message.
 
 This automated criterion is intentionally limited: citation syntax does not establish that every generated claim is entailed by the cited passage. The experiment should therefore not be described as a complete factuality or hallucination benchmark.
 
-The evaluation retrieves five chunks per question. Results are written incrementally so external API failures do not erase completed trials. At the current checkpoint, five supported questions have completed. The remaining trials were interrupted by Gemini free-tier quota exhaustion and are left incomplete rather than counted as failures.
+The evaluation uses a 400-character target, one-sentence overlap, and five retrieved chunks per question (50 chunks over six pages). Results were saved incrementally. Q1–Q5 were preserved from the initial run; Q6–Q12 were completed after resuming following API quota exhaustion. API interruptions were not scored as answers. Model settings were not changed by this update; historical per-response model versions and sampling settings were not logged.
 
 6. Results
 
@@ -184,7 +184,7 @@ across the 300 evaluated SciFact queries.
 
 Target chunk size
 
-Chunks
+Indexed units
 
 Hit@1
 
@@ -210,7 +210,7 @@ Whole document
 
 0.6068
 
-400
+400 chars
 
 36,263
 
@@ -224,7 +224,7 @@ Whole document
 
 0.6570
 
-600
+600 chars
 
 21,565
 
@@ -238,7 +238,7 @@ Whole document
 
 0.6396
 
-800
+800 chars
 
 14,567
 
@@ -252,7 +252,7 @@ Whole document
 
 0.6243
 
-1000
+1000 chars
 
 11,442
 
@@ -266,7 +266,7 @@ Whole document
 
 0.6096
 
-1200
+1200 chars
 
 9,304
 
@@ -286,11 +286,33 @@ The 400-character configuration was not strongest at every retrieval depth. The 
 
 6.3 Grounded Generation Evaluation
 
-Five supported-query trials are currently recorded. Four produced non-refusal answers containing source/page citations, yielding 4/5 (80.0%) supported citation behavior under the automated criterion.
+All 12 controlled questions completed: supported citation behavior was 5/6 (83.33%), unsupported refusal behavior was 6/6 (100.00%), and overall expected behavior was 11/12 (91.67%). These are citation/refusal behavior scores on a small controlled set, not general factual accuracy.
 
-One supported question, asking why chunking is necessary in a RAG system, was incorrectly refused even though its highest retrieved chunk had a similarity score of approximately 0.765. This provides an example in which high retrieval similarity did not guarantee successful answer generation.
+Evaluation
 
-No final unsupported-question refusal rate is reported because the unsupported portion of the recorded run has not yet completed. API quota errors are operational interruptions, not model-answer failures, and are excluded from behavioral accuracy calculations until the corresponding questions produce responses.
+Successful / completed
+
+Rate
+
+Supported citation behavior
+
+5/6
+
+83.33%
+
+Unsupported refusal behavior
+
+6/6
+
+100.00%
+
+Overall expected behavior
+
+11/12
+
+91.67%
+
+Source-document review of the supplied six-page sample.pdf found support for the factual statements in Q2–Q6 on the cited pages (Q2: pages 1–2; Q3–Q4: page 3; Q5: pages 2 and 5; Q6: page 6). Page 2 explicitly explains that chunking avoids inefficient whole-document prompting and context-limit problems, establishing Q1 as answerable from the source. However, the original CSV records only the top similarity score, not the retrieved passages; it cannot establish whether that explanation reached the generator. Q1 is therefore an end-to-end false refusal with unresolved stage attribution, not a proven generation-only failure. The six unsupported questions concern topics absent from the source. This post-hoc source review is not an independent or blinded factuality benchmark and does not verify the historical retrieved context.
 
 7. Discussion
 
@@ -302,7 +324,7 @@ The fact that 600-character chunks outperform 400-character chunks at Hit@3 and 
 
 The small controlled-document evaluation and the SciFact experiment also produced different preferred configurations. The six-question development set favored 600 characters, while the 300-query SciFact benchmark favored 400 by MRR@10. This difference demonstrates why tiny hand-authored evaluations are useful for debugging but weak evidence for general configuration decisions.
 
-The recorded generation failure provides a second lesson. The system retrieved semantically strong evidence for a supported question yet the generator returned the insufficiency message. This separates retrieval success from generation success and argues against evaluating an end-to-end RAG system with a single aggregate score. Retrieval metrics, evidence inspection, and generation behavior should be analyzed separately.
+The false refusal illustrates why retrieval scores, source answerability, and generation behavior must be distinguished. Q1 had top similarity 0.7648, but similarity is not proof of sufficient retrieved evidence. Saved retrieval contexts are needed to attribute the failure to a particular stage.
 
 8. Limitations
 
@@ -320,7 +342,7 @@ Fifth, this report uses Hit@K and MRR@10 rather than the complete set of metrics
 
 Sixth, the FAISS IndexFlatIP implementation is exact; no approximate-nearest-neighbor scalability claim or latency benchmark is made.
 
-Seventh, the generation evaluation is small and incomplete at the current checkpoint. Its supported-answer criterion verifies non-refusal plus citation syntax but does not automatically prove factual entailment of every claim.
+Seventh, the generation evaluation is small, with one recorded response per question and no repeated-run uncertainty analysis. Its supported-answer criterion verifies non-refusal plus citation syntax but does not automatically prove factual entailment of every claim.
 
 Finally, the generator is an external, nondeterministic service subject to model updates and API quotas. No explicit similarity threshold currently controls refusal; the generator decides insufficiency from the evidence and prompt.
 
@@ -330,7 +352,7 @@ This work implemented and evaluated an end-to-end RAG prototype for scientific d
 
 Among the tested settings, a 400-character target achieved the strongest Hit@1 and MRR@10, improving Hit@1 by 7.34 percentage points over the whole-document MiniLM baseline and increasing MRR@10 by approximately 8.3% relative. A 600-character target achieved the strongest Hit@3 and Hit@5, demonstrating that the preferred chunk size depends on retrieval depth and system objective.
 
-The study also illustrates why retrieval and generation should be evaluated separately. A controlled supported query was refused despite high retrieval similarity, showing that evidence retrieval does not guarantee correct generation behavior.
+The study also illustrates why retrieval and generation should be evaluated separately. A controlled supported query was refused despite high retrieval similarity, showing that similarity alone does not establish end-to-end answer success.
 
 Future work can extend the experiment to additional embedding models, semantic and structure-aware chunking, document-level score aggregation, reranking, broader BEIR metrics, larger grounding evaluations, and human or entailment-based assessment of citation support.
 
@@ -352,6 +374,6 @@ Appendix A. Reproducibility Notes
 
 Core experimental artifacts in the project include the SciFact baseline results CSV, chunk-size results CSV, controlled generation evaluation runner and incremental results CSV, retrieval evaluation utilities, sentence-aware chunker, MiniLM embedder, NumPy and FAISS retrievers, persistent index storage, FastAPI backend, and React frontend.
 
-The generation-question JSON is currently stored under a data path ignored by Git and should be moved or explicitly tracked before the final reproducibility release.
+The tracked question set is research/generation_evaluation_questions.json. Place the original controlled PDF at data/raw/sample.pdf before running the evaluation. This fixture is an instructional document about RAG, separate from the SciFact corpus; its example experiments are not results of this study.
 
-The current generation evaluation can be resumed without rerunning completed questions. The five recorded supported trials should be preserved; incomplete questions should only be added when the external API returns an actual model response.
+All 12 original recorded answers are preserved. Future prompt changes or repeat trials should use a separate results file rather than overwrite this evaluation. The CSV lacks retrieved-context snapshots, model response identifiers, and per-trial timestamps, which limits historical replay.

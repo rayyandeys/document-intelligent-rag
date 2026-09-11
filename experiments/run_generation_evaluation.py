@@ -14,7 +14,7 @@ from src.retrieval.faiss_retriever import FAISSRetriever
 
 
 PDF_PATH = "data/raw/sample.pdf"
-QUESTIONS_PATH = "data/processed/generation_evaluation_questions.json"
+QUESTIONS_PATH = "research/generation_evaluation_questions.json"
 OUTPUT_PATH = "experiments/generation_evaluation_results.csv"
 
 CHUNK_SIZE = 400

@@ -43,41 +43,41 @@ A secondary question examines whether evidence-constrained generation can provid
 Architecture
 
 PDF
- |
- v
+|
+v
 PyMuPDF Text Extraction
- |
- v
+|
+v
 Sentence-Aware Character-Budget Chunking
- |
- v
+|
+v
 all-MiniLM-L6-v2 Embeddings
- |
- v
+|
+v
 Normalized 384-D Vectors
- |
- v
+|
+v
 FAISS IndexFlatIP
- |
- +----------------------+
-                        |
+|
++----------------------+
+|
 User Question           |
-     |                  |
-     v                  |
+|                  |
+v                  |
 MiniLM Query Embedding  |
-     |                  |
-     +----------------->|
-                        v
-                  Top-k Retrieval
-                        |
-                        v
-              Retrieved Evidence
-                        |
-                        v
-          Evidence-Constrained Gemini
-                        |
-                        v
-          Answer + Source/Page Citations
+|                  |
++----------------->|
+v
+Top-k Retrieval
+|
+v
+Retrieved Evidence
+|
+v
+Evidence-Constrained Gemini
+|
+v
+Answer + Source/Page Citations
 
 The application uses normalized embeddings. Therefore, inner-product ranking with FAISS IndexFlatIP is cosine-equivalent for these vectors. IndexFlatIP performs exact search; this project does not claim approximate-nearest-neighbor retrieval.
 
@@ -209,17 +209,7 @@ six questions deliberately unsupported by that document.
 
 Supported behavior currently requires a non-refusal answer containing source/page citation syntax. Unsupported behavior requires the system's exact insufficient-evidence response.
 
-At the current checkpoint:
-
-5/12 questions have completed;
-
-4/5 completed supported trials produced the expected citation behavior;
-
-one supported query was incorrectly refused despite a top retrieval similarity of approximately 0.765;
-
-the remaining trials were interrupted by external Gemini API quota exhaustion.
-
-Quota errors are not counted as model-answer failures because no answer was produced.
+All 12 controlled questions completed: supported citation behavior was 5/6 (83.33%), unsupported refusal behavior was 6/6 (100.00%), and overall expected behavior was 11/12 (91.67%). These are citation/refusal behavior scores on a small controlled set, not general factual accuracy.
 
 This evaluation is intentionally modest. Citation syntax alone does not prove that every generated claim is entailed by the cited evidence, so these results should not be interpreted as a complete factuality or hallucination benchmark.
 
@@ -293,14 +283,12 @@ Runtime documents, generated indexes, environment files, and other local artifac
 
 Installation
 
-1. Clone the repository
+Clone the repository
 
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/rayyandeys/document-intelligent-rag.git
 cd document-intelligent-rag
 
-Replace <YOUR_REPOSITORY_URL> with this repository's clone URL.
-
-2. Create a Python virtual environment
+Create a Python virtual environment
 
 Windows:
 
@@ -312,11 +300,11 @@ macOS/Linux:
 python3 -m venv .venv
 source .venv/bin/activate
 
-3. Install Python dependencies
+Install Python dependencies
 
 python -m pip install -r requirements.txt
 
-4. Configure Gemini
+Configure Gemini
 
 Create a .env file in the project root:
 
@@ -330,7 +318,7 @@ Backend
 
 From the project root:
 
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main --reload
 
 Default development API:
 
@@ -425,6 +413,8 @@ This is a chunk-first ranking approximation rather than exhaustive document-leve
 
 Running the Generation Evaluation
 
+Place the original six-page controlled PDF at data/raw/sample.pdf. The runner reads the tracked question set from research/generation_evaluation_questions.json.
+
 python -m experiments.run_generation_evaluation
 
 The runner saves completed results incrementally and resumes from existing results, so a quota or server interruption does not require rerunning completed questions.
@@ -491,7 +481,7 @@ The current study uses one embedding model and one sentence-aware chunking famil
 
 SciFact provides document-level relevance judgments, whereas the product workflow operates on PDF chunks with page metadata. The two evaluations therefore measure related but not identical retrieval tasks.
 
-The generation evaluation is small and currently incomplete. Its automated citation criterion verifies citation presence, not full claim-level entailment.
+The generation evaluation is small and complete for the planned 12 questions. Its automated citation criterion verifies citation presence, not full claim-level entailment.
 
 Future Work
 
@@ -523,4 +513,4 @@ B.Tech Software Engineering student.
 
 Status
 
-Active research/engineering project. Core retrieval experiments and the end-to-end RAG application are implemented. The controlled generation evaluation remains partially incomplete due to external API quota limits.
+Active research/engineering project. Core retrieval experiments and the end-to-end RAG application are implemented. The planned 12-question controlled generation evaluation is complete (11/12 expected behaviors).

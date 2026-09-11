@@ -13,3 +13,12 @@ It has the following characteristics:
 - Smaller or extremely small chunks may lack the context required to answer complex questions or contain insufficient context to answer a question [Source: sample.pdf, Page: 2, Page: 5].
 - Larger chunks may provide more context [Source: sample.pdf, Page: 5].
 - Larger or extremely large chunks can contain unrelated information or several unrelated ideas, which can reduce retrieval precision and provide the language model with unnecessary context [Source: sample.pdf, Page: 2, Page: 5]."
+6,Why should retrieval failures and generation failures be evaluated separately?,False,False,True,True,0.7431113123893738,"Evaluating retrieval failures and generation failures separately helps determine the cause of an incorrect answer:
+- If the correct evidence was never retrieved, the language model may not have enough information to produce a correct answer [Source: sample.pdf, Page: 6].
+- If the correct evidence was retrieved but the answer is still incorrect, the problem may instead be related to the generation stage [Source: sample.pdf, Page: 6]."
+7,What are the health benefits of drinking green tea?,True,True,False,True,0.10238604992628098,The provided documents do not contain enough information to answer this question.
+8,Who won the FIFA World Cup in 2022?,True,True,False,True,0.16088172793388367,The provided documents do not contain enough information to answer this question.
+9,What is the capital of Australia?,True,True,False,True,0.060620687901973724,The provided documents do not contain enough information to answer this question.
+10,How does photosynthesis work?,True,True,False,True,0.24336448311805725,The provided documents do not contain enough information to answer this question.
+11,What causes earthquakes?,True,True,False,True,0.10172247141599655,The provided documents do not contain enough information to answer this question.
+12,How do vaccines protect against infectious diseases?,True,True,False,True,0.11632512509822845,The provided documents do not contain enough information to answer this question.
