@@ -1,516 +1,540 @@
-Document Intelligence RAG
+\# Document Intelligence RAG
 
-A research-oriented Retrieval-Augmented Generation (RAG) system for scientific documents.
 
-The project combines a working PDF question-answering application with controlled retrieval experiments. It studies how sentence-aware chunk size affects retrieval effectiveness and separately evaluates evidence-constrained generation behavior.
 
-Highlights
+A PDF question-answering application and reproducible study of document chunking for scientific-document retrieval.
 
-PDF ingestion with page-level source metadata
 
-Sentence-aware character-budget chunking with overlap
 
-sentence-transformers/all-MiniLM-L6-v2 embeddings
+Built with FastAPI, React/TypeScript, MiniLM embeddings, FAISS and Gemini. The application retrieves page-linked evidence and generates answers with source citations and insufficient-evidence refusal instructions.
 
-384-dimensional normalized dense vectors
 
-Exact FAISS IndexFlatIP retrieval
 
-Persistent indexes and chunk metadata
+\## Research highlights
 
-Gemini-based evidence-constrained generation
 
-Source/page citations and explicit insufficient-evidence refusal behavior
 
-FastAPI backend
+\- Evaluated four retrieval conditions on \*\*623 queries across SciFact and NFCorpus\*\*.
 
-React + TypeScript frontend
+\- Compared BM25, whole-document MiniLM, and 400- and 600-character chunk configurations.
 
-SciFact retrieval benchmark
+\- Used exact document-level maximum-score aggregation for the journal experiments.
 
-Controlled chunk-size ablation
+\- Reported paired bootstrap uncertainty and encoder input-length diagnostics.
 
-Separate generation grounding/refusal evaluation
+\- Completed a separate 12-question citation/refusal behavior check.
 
-Research paper-style technical report
+\- Manuscript submitted to \*\*SN Computer Science\*\*, September 2026. \*\*Not yet accepted or published.\*\*
 
-Research Question
 
-How does document chunk size affect retrieval effectiveness in a retrieval-augmented generation pipeline for scientific documents?
 
-A secondary question examines whether evidence-constrained generation can provide cited answers for supported questions while refusing questions unsupported by the retrieved evidence.
+\## Application architecture
 
-Architecture
 
-PDF
-|
-v
-PyMuPDF Text Extraction
-|
-v
-Sentence-Aware Character-Budget Chunking
-|
-v
-all-MiniLM-L6-v2 Embeddings
-|
-v
-Normalized 384-D Vectors
-|
-v
-FAISS IndexFlatIP
-|
-+----------------------+
-|
-User Question           |
-|                  |
-v                  |
-MiniLM Query Embedding  |
-|                  |
-+----------------->|
-v
-Top-k Retrieval
-|
-v
-Retrieved Evidence
-|
-v
-Evidence-Constrained Gemini
-|
-v
-Answer + Source/Page Citations
 
-The application uses normalized embeddings. Therefore, inner-product ranking with FAISS IndexFlatIP is cosine-equivalent for these vectors. IndexFlatIP performs exact search; this project does not claim approximate-nearest-neighbor retrieval.
+```mermaid
 
-Retrieval Results
+flowchart TD
 
-Retrieval was evaluated on 300 SciFact test queries over a corpus of 5,183 scientific documents.
+&#x20;   A\["PDF upload"] --> B\["Page-preserving text extraction"]
 
-Target chunk size
+&#x20;   B --> C\["Sentence-aware character-budget chunks"]
 
-Indexed units
+&#x20;   C --> D\["MiniLM embeddings"]
 
-Hit@1
+&#x20;   D --> E\["Persistent FAISS index and metadata"]
 
-Hit@3
+&#x20;   Q\["User question"] --> F\["MiniLM query embedding"]
 
-Hit@5
+&#x20;   F --> G\["Top-k evidence retrieval"]
 
-Hit@10
+&#x20;   E --> G
 
-MRR@10
+&#x20;   G --> H\["Evidence-constrained Gemini generation"]
 
-Whole document
+&#x20;   H --> I\["Answer with source and page citations"]
 
-5,183
+```
 
-0.5033
 
-0.6767
 
-0.7567
+MiniLM produces normalized 384-dimensional vectors. FAISS `IndexFlatIP` performs exact inner-product search, equivalent to cosine ranking for these normalized vectors.
 
-0.8000
 
-0.6068
 
-400 chars
+The application retrieves PDF chunks. The journal evaluation separately ranks benchmark documents using the maximum similarity across \*\*all\*\* chunks belonging to each document.
 
-36,263
 
-0.5767
 
-0.7133
+\## Retrieval results
 
-0.7567
 
-0.8333
 
-0.6570
+The journal suite uses SciFact's 300 test queries and 5,183 documents, and NFCorpus's 323 test queries and 3,633 documents.
 
-600 chars
 
-21,565
 
-0.5300
+| Dataset | Configuration | Hit@1 | MRR@10 | nDCG@10 | Recall@10 |
 
-0.7200
+|---|---|---:|---:|---:|---:|
 
-0.7833
+| SciFact | BM25 | 0.5333 | 0.6276 | 0.6617 | 0.7909 |
 
-0.8333
+| SciFact | MiniLM whole document | 0.5033 | 0.6068 | 0.6484 | 0.7883 |
 
-0.6396
+| SciFact | MiniLM 400 characters | 0.5767 | 0.6570 | 0.6961 | 0.8250 |
 
-800 chars
+| SciFact | MiniLM 600 characters | 0.5300 | 0.6396 | 0.6830 | 0.8250 |
 
-14,567
+| NFCorpus | BM25 | 0.4334 | 0.5151 | 0.3069 | 0.1491 |
 
-0.5267
+| NFCorpus | MiniLM whole document | 0.4272 | 0.5104 | 0.3186 | 0.1589 |
 
-0.7033
+| NFCorpus | MiniLM 400 characters | 0.4303 | 0.5279 | 0.3374 | 0.1677 |
 
-0.7733
+| NFCorpus | MiniLM 600 characters | 0.4365 | 0.5221 | 0.3354 | 0.1630 |
 
-0.8167
 
-0.6243
 
-1000 chars
+The 400-character configuration achieved the highest observed MRR@10 and nDCG@10 among these conditions on both datasets. It was not best on every metric.
 
-11,442
 
-0.4967
 
-0.6800
+Paired, exploratory 95% bootstrap intervals for its nDCG@10 improvement:
 
-0.7700
 
-0.8333
 
-0.6096
+| Dataset | Comparator | Difference | 95% interval |
 
-1200 chars
+|---|---|---:|---|
 
-9,304
+| SciFact | Whole-document MiniLM | +0.04769 | \[0.01943, 0.07624] |
 
-0.5133
+| SciFact | BM25 | +0.03442 | \[-0.00058, 0.07049] |
 
-0.7033
+| NFCorpus | Whole-document MiniLM | +0.01873 | \[0.00720, 0.03104] |
 
-0.7500
+| NFCorpus | BM25 | +0.03042 | \[0.01110, 0.04998] |
 
-0.8200
 
-0.6187
 
-Main Findings
+Intervals use 10,000 paired query-bootstrap replicates with seed 42 and are not adjusted for multiple comparisons. The SciFact interval against BM25 includes zero.
 
-The 400-character configuration produced the strongest tested Hit@1 and MRR@10:
 
-Hit@1: 50.33% -> 57.67%
 
-Absolute Hit@1 improvement: +7.34 percentage points
+\### Truncation and interpretation
 
-MRR@10: 0.6068 -> 0.6570
 
-Relative MRR@10 improvement: approximately 8.3%
 
-However, 600-character chunks achieved the highest Hit@3 and Hit@5. The experiment therefore does not claim that 400 characters is universally optimal. The preferred granularity depends on retrieval depth and system objective.
+The recorded MiniLM input limit is 256 tokens. Approximately 71.58% of SciFact whole-document inputs and 79.05% of NFCorpus whole-document inputs exceeded that limit.
 
-A six-question controlled development set initially favored 600-character chunks, while the larger 300-query SciFact evaluation favored 400 characters by MRR@10. This difference is one reason the project treats the larger benchmark as the stronger basis for conclusions.
 
-Generation Evaluation
 
-A separate 12-question controlled evaluation is designed to test:
+Small chunks change representation granularity and preserve access to later document text. These experiments do not isolate those effects. They do not establish a universally optimal chunk size or state-of-the-art retrieval performance.
 
-six questions supported by the controlled document;
 
-six questions deliberately unsupported by that document.
 
-Supported behavior currently requires a non-refusal answer containing source/page citation syntax. Unsupported behavior requires the system's exact insufficient-evidence response.
+The chunker uses punctuation-based sentence splitting, character targets and one-sentence overlap. It is not semantic chunking, and its character targets are not strict token limits.
 
-All 12 controlled questions completed: supported citation behavior was 5/6 (83.33%), unsupported refusal behavior was 6/6 (100.00%), and overall expected behavior was 11/12 (91.67%). These are citation/refusal behavior scores on a small controlled set, not general factual accuracy.
 
-This evaluation is intentionally modest. Citation syntax alone does not prove that every generated claim is entailed by the cited evidence, so these results should not be interpreted as a complete factuality or hallucination benchmark.
 
-Tech Stack
+\## Separate generation evaluation
 
-Backend and Research
 
-Python 3.12
 
-FastAPI
+A historical evaluation used 12 questions about a controlled six-page PDF.
 
-Uvicorn
 
-PyMuPDF
 
-Sentence Transformers
+| Behavior | Result |
 
-all-MiniLM-L6-v2
+|---|---:|
 
-FAISS
+| Supported answer with citation syntax | 5/6 |
 
-NumPy
+| Expected refusal for unsupported question | 6/6 |
 
-Google GenAI SDK / Gemini
+| Overall expected behavior | 11/12 |
 
-Hugging Face Datasets
 
-pandas
 
-Frontend
+These measure citation presence and refusal behavior, not general factual accuracy or claim-level entailment. One supported question received a false refusal.
 
-React
 
-TypeScript
 
-Vite
+Generation was not evaluated on the SciFact or NFCorpus benchmark queries. Historical retrieved contexts and per-response model versions were not recorded, limiting exact replay.
 
-Project Structure
 
-document-intelligent-rag/
-├── app/
-│   └── main.py
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   ├── uploads/
-│   └── indexes/
-├── experiments/
-│   ├── compare_retrieval_configs.py
-│   ├── compare_scifact_chunk_sizes.py
-│   ├── run_scifact_baseline.py
-│   ├── run_generation_evaluation.py
-│   ├── scifact_baseline_results.csv
-│   ├── scifact_chunk_size_results.csv
-│   └── generation_evaluation_results.csv
-├── frontend/
-├── research/
-│   ├── paper.md
-│   └── generation_evaluation_questions.json
-├── src/
-│   ├── evaluation/
-│   ├── generation/
-│   ├── ingestion/
-│   └── retrieval/
-├── tests/
-├── .gitignore
-├── requirements.txt
-└── README.md
 
-Runtime documents, generated indexes, environment files, and other local artifacts are excluded from Git where appropriate.
+\## Manuscript and research artifacts
 
-Installation
 
-Clone the repository
+
+\*\*Title:\*\* Evaluating Chunking Strategies for Retrieval Augmented Generation over Scientific Documents  
+
+\*\*Author:\*\* Syed Mohammed Rayyan  
+
+\*\*Status:\*\* Submitted to SN Computer Science, September 2026.
+
+
+
+\- \[Submission supplementary archive](https://github.com/rayyandeys/document-intelligent-rag/blob/2e9f270987561cbc90cc439864704d9996733571/ESM\_1.zip)
+
+\- \[Saved journal experiment outputs](experiments/journal/)
+
+\- \[Earlier project technical report](research/paper.md)
+
+\- \[Controlled generation questions](research/generation\_evaluation\_questions.json)
+
+
+
+The earlier technical report describes a previous stage of the project and is not the submitted manuscript.
+
+
+
+The supplementary archive contains the source snapshot, saved rankings, manifests, summaries and truncation analysis. The source snapshot was collected after execution; it is not a contemporaneous cryptographic record of the executed code.
+
+
+
+ChatGPT/Codex assisted with implementation, analysis and manuscript preparation, as disclosed in the manuscript. The human author remains responsible for the work.
+
+
+
+\## Technology
+
+
+
+| Component | Technology |
+
+|---|---|
+
+| API | Python, FastAPI, Uvicorn |
+
+| PDF extraction | PyMuPDF |
+
+| Embeddings | Sentence Transformers, all-MiniLM-L6-v2 |
+
+| Application vector search | FAISS IndexFlatIP |
+
+| Generation | Google GenAI SDK / Gemini |
+
+| Evaluation | NumPy, pandas, benchmark qrels |
+
+| Frontend | React, TypeScript, Vite |
+
+
+
+\## Local setup
+
+
+
+```bash
 
 git clone https://github.com/rayyandeys/document-intelligent-rag.git
+
 cd document-intelligent-rag
 
-Create a Python virtual environment
+```
 
-Windows:
+
+
+Create and activate a virtual environment.
+
+
+
+Windows CMD:
+
+
+
+```cmd
 
 python -m venv .venv
-.venv\Scripts\activate
+
+.venv\\Scripts\\activate
+
+```
+
+
 
 macOS/Linux:
 
+
+
+```bash
+
 python3 -m venv .venv
+
 source .venv/bin/activate
 
-Install Python dependencies
+```
+
+
+
+Install dependencies:
+
+
+
+```bash
 
 python -m pip install -r requirements.txt
 
-Configure Gemini
+```
 
-Create a .env file in the project root:
 
-GEMINI_API_KEY=your_api_key_here
 
-Do not commit .env or API keys.
+Create a `.env` file in the project root:
 
-Running the Application
 
-Backend
+
+```dotenv
+
+GEMINI\_API\_KEY=your\_api\_key\_here
+
+```
+
+
+
+Keep API keys private. Gemini generation requires a valid key and available quota.
+
+
+
+\### Start the API
+
+
 
 From the project root:
 
+
+
+```bash
+
 python -m uvicorn app.main --reload
 
-Default development API:
+```
 
-http://127.0.0.1:8000
 
-Interactive FastAPI documentation:
 
-http://127.0.0.1:8000/docs
+\- Local API: http://127.0.0.1:8000
 
-Frontend
+\- Interactive API documentation: http://127.0.0.1:8000/docs
 
-Open a second terminal:
+
+
+\### Start the frontend
+
+
+
+In a separate terminal:
+
+
+
+```bash
 
 cd frontend
+
 npm install
+
 npm run dev
 
-On Windows PowerShell systems where script execution blocks npm.ps1, use:
+```
 
-npm.cmd install
-npm.cmd run dev
 
-Default Vite development URL:
 
-http://localhost:5173
+Open the URL printed by Vite, usually http://localhost:5173.
 
-API Overview
 
-GET /
 
-Basic application information.
+If PowerShell blocks `npm.ps1`, use `npm.cmd install` and `npm.cmd run dev`.
 
-GET /health
 
-Health check.
 
-POST /documents/upload
+\## API overview
 
-Uploads and indexes a PDF.
 
-The pipeline:
 
-stores the uploaded document under an internal identifier;
+| Endpoint | Purpose |
 
-extracts page text;
+|---|---|
 
-preserves the original filename as citation metadata;
+| `GET /` | Application information |
 
-creates sentence-aware chunks;
+| `GET /health` | Health check |
 
-embeds the chunks;
+| `POST /documents/upload` | Upload, extract, chunk and index a PDF |
 
-builds a FAISS index;
+| `POST /query` | Retrieve evidence and generate an answer |
 
-persists index and chunk metadata.
 
-POST /query
 
-Loads a persisted document index, retrieves relevant chunks, sends evidence to the generator, and returns:
+Use the interactive API documentation for request schemas.
 
-generated answer;
 
-source filename;
 
-page number;
+The upload pipeline preserves the original filename and page metadata for citations. Persisted indexes and chunk metadata support later queries.
 
-chunk identifier;
 
-similarity score;
 
-retrieved text.
+Refusal is prompted through Gemini; there is no explicit retrieval-score threshold guaranteeing refusal.
 
-Running the Retrieval Experiments
 
-SciFact whole-document baseline
 
-python -m experiments.run_scifact_baseline
+\## Reproducing the experiments
 
-SciFact chunk-size comparison
 
-python -m experiments.compare_scifact_chunk_sizes
 
-The chunk-size experiment evaluates target budgets of:
+\### Journal retrieval suite
 
-400, 600, 800, 1000, 1200
 
-with one-sentence overlap.
 
-For chunked SciFact retrieval, the experiment retrieves the top 50 chunks, deduplicates them by document ID, and uses the first ten unique documents for document-level Hit@K and MRR@10 evaluation.
+From the project root with the Python environment active:
 
-This is a chunk-first ranking approximation rather than exhaustive document-level max-score aggregation.
 
-Running the Generation Evaluation
 
-Place the original six-page controlled PDF at data/raw/sample.pdf. The runner reads the tracked question set from research/generation_evaluation_questions.json.
+```bash
 
-python -m experiments.run_generation_evaluation
+python -m experiments.run\_journal\_suite
 
-The runner saves completed results incrementally and resumes from existing results, so a quota or server interruption does not require rerunning completed questions.
+```
 
-The reproducible question set is available at:
 
-research/generation_evaluation_questions.json
 
-Research Paper
+This evaluates BM25 and three MiniLM representations on SciFact and NFCorpus. Dataset/model downloads require network access, and dense encoding can take substantial time on a CPU.
 
-The paper-style technical report is stored at:
 
-research/paper.md
 
-It documents:
+The saved runs record model revision:
 
-research questions;
 
-related work;
 
-architecture;
+```text
 
-methodology;
+1110a243fdf4706b3f48f1d95db1a4f5529b4d41
 
-SciFact setup;
+```
 
-retrieval metrics;
 
-chunk-size results;
 
-controlled generation evaluation;
+Check the manifests for package versions, input hashes and configuration. Numerical reproduction depends on the recorded environment and model.
 
-discussion;
 
-limitations;
 
-reproducibility notes.
+\### Truncation analysis
 
-Important Methodological Notes
 
-The chunker is sentence-aware character-budget chunking, not semantic chunking.
 
-MiniLM embeddings are normalized.
+After the retrieval suite has produced its required outputs:
 
-FAISS IndexFlatIP is used for exact inner-product retrieval.
 
-With normalized vectors, the implemented inner-product ranking is cosine-equivalent.
 
-No explicit retrieval-score threshold currently determines refusal.
+```bash
 
-Gemini is instructed to refuse unsupported questions through the generation prompt.
+python -m experiments.analyze\_truncation
 
-The SciFact chunk experiment retrieves top-50 chunks and deduplicates them into document rankings.
+```
 
-The project does not present FAISS latency or scalability benchmarks.
 
-The generation evaluation is separate from retrieval evaluation.
 
-API quota failures are not treated as model-answer failures.
+Saved rankings, manifests, summaries and length diagnostics are available under `experiments/journal/`.
 
-Limitations
 
-The current study uses one embedding model and one sentence-aware chunking family. It does not compare semantic chunkers, rerankers, multiple embedding models, or approximate vector indexes.
 
-SciFact provides document-level relevance judgments, whereas the product workflow operates on PDF chunks with page metadata. The two evaluations therefore measure related but not identical retrieval tasks.
+\### Earlier SciFact experiments
 
-The generation evaluation is small and complete for the planned 12 questions. Its automated citation criterion verifies citation presence, not full claim-level entailment.
 
-Future Work
 
-Potential extensions include:
+```bash
 
-additional embedding models;
+python -m experiments.run\_scifact\_baseline
 
-semantic and structure-aware chunking;
+python -m experiments.compare\_scifact\_chunk\_sizes
 
-reranking;
+```
 
-document-level max-score aggregation;
 
-nDCG and broader BEIR-style evaluation;
 
-larger supported/unsupported generation sets;
+The earlier chunk-size sweep used 400, 600, 800, 1000 and 1200 characters. It retrieved the top 50 chunks and deduplicated them into document rankings.
 
-entailment-based citation verification;
 
-human evaluation;
 
-deployment-oriented performance benchmarking.
+The journal suite instead uses exhaustive maximum-score aggregation across all chunks per document. Results from these protocols should not be combined into one controlled comparison.
 
-Author
 
-Syed Mohammed Rayyan
 
-B.Tech Software Engineering student.
+The 400- and 600-character budgets were informed by earlier SciFact test-set exploration; this is not a preregistered confirmatory study.
 
-Status
 
-Active research/engineering project. Core retrieval experiments and the end-to-end RAG application are implemented. The planned 12-question controlled generation evaluation is complete (11/12 expected behaviors).
+
+\### Generation behavior check
+
+
+
+Place the original controlled six-page PDF at `data/raw/sample.pdf`. An arbitrary replacement PDF will not reproduce the evaluation.
+
+
+
+```bash
+
+python -m experiments.run\_generation\_evaluation
+
+```
+
+
+
+The runner uses `research/generation\_evaluation\_questions.json`, saves completed results incrementally and resumes from existing results. Reruns can incur API usage and need not reproduce historical model responses.
+
+
+
+\## Repository guide
+
+
+
+| Path | Contents |
+
+|---|---|
+
+| `app/` | FastAPI application |
+
+| `frontend/` | React/TypeScript interface |
+
+| `src/ingestion/` | Document extraction |
+
+| `src/retrieval/` | Chunking, embeddings and retrieval |
+
+| `src/generation/` | Evidence-constrained generation |
+
+| `src/evaluation/` | Evaluation utilities |
+
+| `experiments/` | Experiment runners |
+
+| `experiments/journal/` | Saved research evidence |
+
+| `research/` | Reports and evaluation questions |
+
+| `tests/` | Application/project tests |
+
+
+
+Runtime uploads, downloaded corpora, generated indexes, credentials and dependency folders are excluded from version control.
+
+
+
+\## Limitations and next research directions
+
+
+
+The study covers one encoder, one simple chunking family and two related-domain datasets. BM25 is untuned. It does not benchmark semantic chunkers, rerankers, latency, storage cost or approximate vector search.
+
+
+
+Useful extensions include coverage-matched token windows, semantic segmentation, additional encoders, independent development-set tuning, and larger generation evaluations with claim-level citation verification.
+
+
+
+\## Author
+
+
+
+\*\*Syed Mohammed Rayyan\*\*  
+
+B.Tech Software Engineering student, SRM Institute of Science and Technology.
+

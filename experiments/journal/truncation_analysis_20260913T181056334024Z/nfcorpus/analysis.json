@@ -1,0 +1,231 @@
+{
+  "dataset": "nfcorpus",
+  "source_run": "experiments\\journal\\nfcorpus_dense_20260913T092013673246Z",
+  "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "limit": 256,
+  "groups": {
+    "all_within_limit": {
+      "queries": 5,
+      "small_stratum": true,
+      "paired_differences": {
+        "minilm_400_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": -0.052851693699812755,
+            "ci95_low": -0.12648222369401285,
+            "ci95_high": 0.013532696015438406
+          },
+          "mrr_at_10": {
+            "mean": -0.022222222222222227,
+            "ci95_low": -0.1,
+            "ci95_high": 0.03333333333333333
+          },
+          "hit_at_1": {
+            "mean": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0
+          }
+        },
+        "minilm_400_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": 0.03753723256818413,
+            "ci95_low": -0.2747512770227133,
+            "ci95_high": 0.3
+          },
+          "mrr_at_10": {
+            "mean": 0.1,
+            "ci95_low": 0.0,
+            "ci95_high": 0.2333333333333333
+          },
+          "hit_at_1": {
+            "mean": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0
+          }
+        },
+        "minilm_600_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": -0.04116185024429906,
+            "ci95_low": -0.18251257806371807,
+            "ci95_high": 0.05062859823341259
+          },
+          "mrr_at_10": {
+            "mean": -0.1638888888888889,
+            "ci95_low": -0.375,
+            "ci95_high": 0.02222222222222222
+          },
+          "hit_at_1": {
+            "mean": -0.2,
+            "ci95_low": -0.6,
+            "ci95_high": 0.0
+          }
+        },
+        "minilm_600_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": 0.04922707602369782,
+            "ci95_low": -0.12896067272760947,
+            "ci95_high": 0.21354892544155718
+          },
+          "mrr_at_10": {
+            "mean": -0.04166666666666667,
+            "ci95_low": -0.275,
+            "ci95_high": 0.11666666666666665
+          },
+          "hit_at_1": {
+            "mean": -0.2,
+            "ci95_low": -0.6,
+            "ci95_high": 0.0
+          }
+        }
+      }
+    },
+    "mixed": {
+      "queries": 257,
+      "small_stratum": false,
+      "paired_differences": {
+        "minilm_400_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": 0.019907254648327627,
+            "ci95_low": 0.0074234381535912665,
+            "ci95_high": 0.03264416971637862
+          },
+          "mrr_at_10": {
+            "mean": 0.01582823790994997,
+            "ci95_low": -0.012113249644864429,
+            "ci95_high": 0.04459279074794639
+          },
+          "hit_at_1": {
+            "mean": -0.007782101167315175,
+            "ci95_low": -0.04669260700389105,
+            "ci95_high": 0.0311284046692607
+          }
+        },
+        "minilm_400_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": 0.04015507407001357,
+            "ci95_low": 0.01874299129031739,
+            "ci95_high": 0.06180759894205846
+          },
+          "mrr_at_10": {
+            "mean": 0.023900623803347537,
+            "ci95_low": -0.021664041751590386,
+            "ci95_high": 0.06795221882527329
+          },
+          "hit_at_1": {
+            "mean": 0.0038910505836575876,
+            "ci95_low": -0.058365758754863814,
+            "ci95_high": 0.0622568093385214
+          }
+        },
+        "minilm_600_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": 0.015276253084530315,
+            "ci95_low": 0.003632713257275845,
+            "ci95_high": 0.027000012376407756
+          },
+          "mrr_at_10": {
+            "mean": 0.005938484343153607,
+            "ci95_low": -0.018459406460379225,
+            "ci95_high": 0.030995769254524113
+          },
+          "hit_at_1": {
+            "mean": -0.0038910505836575876,
+            "ci95_low": -0.038910505836575876,
+            "ci95_high": 0.0311284046692607
+          }
+        },
+        "minilm_600_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": 0.03552407250621625,
+            "ci95_low": 0.012066632777878072,
+            "ci95_high": 0.058515469750203344
+          },
+          "mrr_at_10": {
+            "mean": 0.014010870236551173,
+            "ci95_low": -0.030531004879253913,
+            "ci95_high": 0.05735624729788152
+          },
+          "hit_at_1": {
+            "mean": 0.007782101167315175,
+            "ci95_low": -0.05058365758754864,
+            "ci95_high": 0.06614785992217899
+          }
+        }
+      }
+    },
+    "all_over_limit": {
+      "queries": 61,
+      "small_stratum": false,
+      "paired_differences": {
+        "minilm_400_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": 0.01964271038805752,
+            "ci95_low": -0.01149070472120841,
+            "ci95_high": 0.05642070198560317
+          },
+          "mrr_at_10": {
+            "mean": 0.02784283112151965,
+            "ci95_low": -0.006830763726255529,
+            "ci95_high": 0.07133164194639602
+          },
+          "hit_at_1": {
+            "mean": 0.04918032786885246,
+            "ci95_low": 0.0,
+            "ci95_high": 0.11475409836065574
+          }
+        },
+        "minilm_400_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": -0.01118646750892327,
+            "ci95_low": -0.052402013094051764,
+            "ci95_high": 0.028921814796329742
+          },
+          "mrr_at_10": {
+            "mean": -0.041146239916731726,
+            "ci95_low": -0.11050026021337497,
+            "ci95_high": 0.021831902159771013
+          },
+          "hit_at_1": {
+            "mean": -0.03278688524590164,
+            "ci95_low": -0.11475409836065574,
+            "ci95_high": 0.04918032786885246
+          }
+        },
+        "minilm_600_minus_minilm_document": {
+          "ndcg_at_10": {
+            "mean": 0.027831906504122716,
+            "ci95_low": -0.00027973811388391214,
+            "ci95_high": 0.06325006742891133
+          },
+          "mrr_at_10": {
+            "mean": 0.05077413479052823,
+            "ci95_low": 0.008879781420765029,
+            "ci95_high": 0.10191370673952643
+          },
+          "hit_at_1": {
+            "mean": 0.08196721311475409,
+            "ci95_low": 0.01639344262295082,
+            "ci95_high": 0.16393442622950818
+          }
+        },
+        "minilm_600_minus_bm25": {
+          "ndcg_at_10": {
+            "mean": -0.002997271392858082,
+            "ci95_low": -0.057342328936524065,
+            "ci95_high": 0.05316930392454793
+          },
+          "mrr_at_10": {
+            "mean": -0.018214936247723135,
+            "ci95_low": -0.0879804189435337,
+            "ci95_high": 0.05009107468123861
+          },
+          "hit_at_1": {
+            "mean": 0.0,
+            "ci95_low": -0.08196721311475409,
+            "ci95_high": 0.08196721311475409
+          }
+        }
+      }
+    }
+  },
+  "interpretation": "Post-hoc exploratory analysis. Strata use all positively judged relevant documents, including tokenizer special tokens. Not a causal control: competing documents can still be truncated. Small strata have unstable intervals; no multiple-comparison correction."
+}
